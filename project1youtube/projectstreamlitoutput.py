@@ -99,6 +99,18 @@ def execute_query(question):
 # Function to fetch channel data using YouTube API
 def fetch_channel_data(new_channel_id):
     try:
+        # Check if the channel ID already exists in the database
+        mydb = mysql.connector.connect(host="localhost", user="root", password="", database="youtube")
+        cursor = mydb.cursor()
+        cursor.execute("SELECT * FROM channels WHERE channel_id = %s", (new_channel_id,))
+        existing_channel = cursor.fetchone()
+        mydb.close()
+
+        if existing_channel:
+            # Show error message if the channel ID already exists
+            st.error("Channel ID already exists in the database.")
+            return pd.DataFrame()
+        
         request = youtube.channels().list(
             part="contentDetails,snippet,statistics",
             id=new_channel_id
